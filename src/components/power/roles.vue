@@ -95,12 +95,13 @@
           title="分配权限"
           :visible.sync="setRightDialog"
           width="50%"
+          @close="setRightDialogClosed"
           >
            <el-tree :data="rightsList" :props="treeProps"  show-checkbox
-            node-key="id" default-expand-all :default-checked-keys="defKeys"></el-tree>
+            node-key="id" default-expand-all :default-checked-keys="defKeys" ref="treeRef"></el-tree>
             <span slot="footer" class="dialog-footer">
               <el-button @click="setRightDialog = false">取 消</el-button>
-              <el-button type="primary" @click="setRightDialog = false">确 定</el-button>
+              <el-button type="primary" @click="allotRight">确 定</el-button>
             </span>
         </el-dialog>
     </div>
@@ -126,6 +127,8 @@
             rightsList:[],
 
             defKeys:[],
+
+            roleId:'',
             //树形控件的属性绑定对象
             treeProps:{
               label:'authName',
@@ -259,6 +262,7 @@
           },
           //分配权限
           async showSetRight(role){
+            this.roleId = role.id
             //获取所有权限数据
             const {data : res} = await this.$http.get('rights/tree')
             if(res.meta.status != 200){
@@ -279,7 +283,29 @@
             node.children.forEach(item => 
               this.getLeafKeys(item,arr)
             )
-          }
+          },
+          //监听对话框的关闭事件
+          setRightDialogClosed(){
+             this.defKeys = []
+          },
+          //点击为角色分配权限
+          async allotRight(){
+              const keys = [
+                ...this.$refs.treeRef.getCheckedKeys(),
+                ...this.$refs.treeRef.getHalfCheckedKeys()
+              ]
+              console.log(keys)
+              const idStr = keys.join(',')
+              const {data : res}  = await this.$http.post(`roles/${this.roleId}/rights`,{rids: idStr})
+              if(res.meta.status !== 200){
+                 return this.$message.error('分配权限失败！')
+              }
+              this.$message.success('权限分配成功！')
+              this.getRolesList()
+              this.setRightDialog = false
+            }
+
+
         } 
     }
 </script>
