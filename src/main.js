@@ -9,7 +9,7 @@ import TreeTable from 'vue-table-with-tree-grid'
 // import notice from './components/notice/index';
 
 
-axios.defaults.baseURL = 'http://121.5.240.120:8000/api/private/v1/'
+axios.defaults.baseURL = 'http://shop.zzp.world/api/private/v1/'
 axios.interceptors.request.use((config)=>{
      config.headers.Authorization = window.sessionStorage.getItem('token')
      return config
